@@ -7,6 +7,7 @@
 
 
 declare RUNTIME_ARGS="$@"
+declare UPDATE_STATUS="/data/ionoid/boot/update-os.status"
 
 export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
@@ -20,6 +21,12 @@ mark_update_bad() {
 check_exit_status() {
         local exit_code=$?
         if [ $exit_code -ne 0 ]; then
+                #
+                # Always remove update status on failures/rollback
+                # so we do not trigger it next reboot (rollback)
+                #
+                rm -f "${UPDATE_STATUS}"
+
                 echo "Error: check update status: [failed]"
                 mark_update_bad
         else
