@@ -29,6 +29,7 @@ check_exit_status() {
 
                 echo "Error: check update status: [failed]"
                 mark_update_bad
+                # reboot
         else
                 echo "Info: check update status: [succeeded]"
         fi
@@ -45,10 +46,26 @@ check_failed_units() {
 }
 
 check_rauc_status() {
+
+        # check rauc status and exit 1 on failures
+
+        #
+        # If update was good lets mark status finished so we can notify backend
+        # About successful updates in case.
+        # 
+        mkdir -p /data/ionoid/boot/
+        echo -n "STATUS=\"finished\"" >> "${UPDATE_STATUS}"
         return
 }
 
 main() {
+
+        source ${UPDATE_STATUS}
+        if [ "${STATUS}" = "finished" ]; then
+                echo "Info: update already performed and finished with success"
+                rm -f "${UPDATE_STATUS}"
+                exit 0
+        fi
 
         trap check_exit_status EXIT
 
